@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulované vyhledávání</title>
+</head>
+<body>
+    <h1>Vyhledávání klíčového slova</h1>
+    <form id="searchForm">
+        <label for="keyword">Zadejte klíčové slovo:</label>
+        <input type="text" id="keyword" name="keyword" required>
+        <button type="submit">Vyhledat</button>
+    </form>
+    <div id="results"></div>
+
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const keyword = document.getElementById('keyword').value;
+
+            const response = await fetch('/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ keyword })
+            });
+
+            const data = await response.json();
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = "<h2>Výsledky:</h2>";
+
+            data.results.forEach((result, index) => {
+                resultsDiv.innerHTML += `<p><b>${index + 1}. ${result.title}</b>: <a href="${result.url}">${result.url}</a></p>`;
+            });
+
+            // Vygenerujeme odkaz na stažení výsledků ve formátu JSON
+            const downloadLink = document.createElement('a');
+            downloadLink.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data.results));
+            downloadLink.download = 'search_results.json';
+            downloadLink.textContent = 'Stáhnout výsledky jako JSON';
+            resultsDiv.appendChild(downloadLink);
+        });
+    </script>
+</body>
+</html>
